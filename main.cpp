@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "game.h"
+#include "player.h"
 
 int main()
 {
@@ -10,11 +11,24 @@ int main()
     InitWindow(screenWidth, screenHeight, "Connect 4");
 
     Game game(static_cast<float>(screenWidth), static_cast<float>(screenHeight));
+    Player firstPlayer;
+    Player secondPlayer;
+
+    Vector2 mousePos{};
+
+    std::vector<Rectangle> clickableColumn(Rectangle);
+
     SetTargetFPS(60);
     while (!WindowShouldClose())
     {
         // Logic
         //--------------------------------------------------------------------------------------/
+        float dT{ GetFrameTime() };
+        mousePos = GetMousePosition();
+
+
+        //collision check for clickable column area to drop coin
+
         if (IsWindowResized() && !IsWindowFullscreen())
         {
             screenWidth = GetScreenWidth();
@@ -27,7 +41,7 @@ int main()
 
         if (IsWindowResized() || IsWindowFullscreen())
         {
-            game.update(static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight()));
+            game.updateRes(static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight()));
         }
 
         //--------------------------------------------------------------------------------------/
