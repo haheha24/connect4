@@ -5,13 +5,18 @@
 
 class Player {
 public:
-    Player();
-    void turn();
+    Player(int playerNumber = 0);
+    void tick();
+    int getPlayerNumber() { return playerNumber; }
     Color getPlayerColor() { return playerColor; }
-    Color setPlayerColor(Color newColor) { playerColor = newColor; }
-    int getCoins() { return numOfCoinsLeft; };
+    Color setPlayerColor(Color newColor) { return playerColor = newColor; }
+    int getCoins() { return numOfCoinsLeft; }
+    bool getPlayerTurn() { return playerTurn; }
+    void setPlayerTurn(bool turn) { playerTurn = turn; }
 private:
     Color playerColor;
+    int playerNumber{};
+    bool playerTurn{ false };
     int numOfCoinsLeft{ 21 };
     bool hasTurns{ true };
 };

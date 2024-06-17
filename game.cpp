@@ -11,23 +11,15 @@ Game::Game(float screenWidth, float screenHeight) :
         for (int j = 0; j < ROWS; j++)
         {
             grid[i].push_back({
-                    .x = j, // row
-                    .y = i, // col
+                    .row = j + 1, // col
+                    .column = i + 1, // row
                     .rec = Rectangle{
-                        static_cast<float>(recSrc.x + (i * recSrc.width)),
+                        static_cast<float>(recSrc.x + (i * recSrc.width / COLS)),
                         static_cast<float>(recSrc.y + (j * recSrc.height)),
                         static_cast<float>(recSrc.width / COLS),
                         static_cast<float>(recSrc.height / ROWS)},
                 });
         }
-
-        //setup tracking for player turn using this as collision rect against mouse and other animations
-        columns.push_back(Rectangle{
-            .x = static_cast<float>(recSrc.x + (i * recSrc.width)),
-            .y = static_cast<float>(recSrc.y),
-            .width = static_cast<float>(recSrc.width / COLS),
-            .height = static_cast<float>(recSrc.height)
-            });
     }
     colors[0] = { true, RED };
     colors[1] = { true, YELLOW };
@@ -65,50 +57,51 @@ void Game::updateRes(float newScreenWidth, float newScreenHeight)
     }
 };
 
-void Game::draw()
+void Game::draw(Player player)
 {
+    Color color{ WHITE };
     DrawRectangle(recSrc.x, recSrc.y, recSrc.width, recSrc.height, BLUE);
     for (int i = 0; i < COLS; i++)
     {
         for (int j = 0; j < ROWS; j++)
         {
-            DrawRectangleLines(recSrc.x + (i * grid[i][j].rec.width),
-                recSrc.y + (j * grid[i][j].rec.height),
-                grid[i][j].rec.width,
-                grid[i][j].rec.height,
+            Cell cell = grid[i][j];
+            color = !cell.blank ? player.getPlayerColor() : WHITE;
+            DrawRectangleLines(recSrc.x + (i * cell.rec.width),
+                recSrc.y + (j * cell.rec.height),
+                cell.rec.width,
+                cell.rec.height,
                 BLACK);
-            DrawCircle(recSrc.x + (i * grid[i][j].rec.width) + (grid[i][j].rec.width / 2),
-                recSrc.y + (j * grid[i][j].rec.height) + (grid[i][j].rec.height / 2),
-                ((grid[i][j].rec.width + grid[i][j].rec.height) / 2) * 0.33f,
-                WHITE); // will have to draw these white circles after the falling coin for visual effect of going down a hole.
+            DrawCircle(recSrc.x + (i * cell.rec.width) + (cell.rec.width / 2),
+                recSrc.y + (j * cell.rec.height) + (cell.rec.height / 2),
+                ((cell.rec.width + cell.rec.height) / 2) * 0.33f,
+                color); // will have to draw these white circles after the falling coin for visual effect of going down a hole.
+            string posY{ "Col: " };
+            posY.append(to_string(cell.column), 0, 10);
+            string posX{ "Row: " };
+            posX.append(to_string(cell.row), 0, 10).append("\n" + posY);
+            DrawText(posX.c_str(), recSrc.x + (i * cell.rec.width), recSrc.y + (j * cell.rec.height) + (cell.rec.height / 2), std::clamp(GetFontDefault().baseSize, 10, 24), RED);
         }
 
     }
-    for (auto rec : columns)
-    {
-        DrawRectangle(rec.x, rec.y, rec.width, rec.height, RED);
-    }
-
 };
 
 void Game::tick(Player player) {
     // need to check each cell if mouse is clicking it
     for (int i = 0; i < COLS; i++)
     {
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), columns[i]))
+        for (int j = ROWS; j > 0; j--) // Work backwards, starting from the end of the column checking each cell for blank = true.
         {
-            for (int j = ROWS; j > 0; j--)
+            if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) &&
+                CheckCollisionPointRec(GetMousePosition(), grid[i][j].rec) &&
+                grid[i][j].blank)
             {
-                if (grid[i][j].blank)
-                {
-                    //always want pos x to be 0, while getting the bottom of a cell that is blank, BUT needs to be the last blank cell position.
-                    DrawCircle(
-                        recSrc.x + (recSrc.width / 2) + (i * recSrc.width),
-                        grid[i][j].rec.y + grid[i][j].rec.height, ((grid[i][j].rec.width + grid[i][j].rec.height) / 2) * 0.33f, player.getPlayerColor());
-                    player.turn();
-                    grid[i][j].blank = false;
-                    goto stop;
-                }
+                DrawCircle(
+                    recSrc.x + (recSrc.width / 2) + (i * recSrc.width / COLS),
+                    grid[i][j].rec.y + grid[i][j].rec.height, ((grid[i][j].rec.width + grid[i][j].rec.height) / 2) * 0.33f, player.getPlayerColor());
+                player.tick();
+                grid[i][j].blank = false;
+                goto stop;
             }
         }
     }

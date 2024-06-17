@@ -1,8 +1,8 @@
 #include "player.h"
 
 
-Player::Player() {};
+Player::Player(int playerNumber) : playerNumber(playerNumber) {};
 
-void Player::turn() {
+void Player::tick() {
     numOfCoinsLeft > 0 ? numOfCoinsLeft -= 1 : !hasTurns;
 };

@@ -4,29 +4,36 @@
 #include <vector>
 #include "raylib.h"
 #include "player.h"
+#include <iostream>
+#include <algorithm>
+#include <map>
+using namespace std;
 
 class Game
 {
 protected:
     struct Cell
     {
-        int x{};
-        int y{};
+        int row{};
+        int column{};
         bool blank{ true };
-        bool mouseCollision{ false };
         Rectangle rec{};
     };
 public:
     Game(float screenWidth, float screenHeight);
+    void addPlayer(Player player) { players.insert({ numOfPlayers, player }); }
     void updateRes(float newScreenWidth, float newScreenHeight);
-    void draw();
+    void draw(Player player);
     bool isCellEmpty(Cell cell) { return cell.blank; };
     void tick(Player player);
     std::vector<std::vector<Cell>> getGrid() { return grid; }
     void setPlayerColor(Player player, Color color);
+    Player getTurnPlayer() { return turnPlayer; }
+    int setTurnPlayer(Player player) { turnPlayer = player; }
 private:
-    static const int COLS{ 7 };
-    static const int ROWS{ 6 };
+    int numOfPlayers{ 2 };
+    static constexpr int COLS{ 7 };
+    static constexpr int ROWS{ 6 };
     float screenWidth{};
     float screenHeight{};
     float width{ screenWidth * 0.75f };
@@ -46,6 +53,8 @@ private:
     };
     static const int sizeOfPlayerColors{ 3 };
     PlayerColor colors[sizeOfPlayerColors];
+    map<int, Player> players{};
+    Player turnPlayer;
 };
 
 #endif

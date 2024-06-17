@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "game.h"
 #include "player.h"
+#include <vector>
 
 int main()
 {
@@ -10,9 +11,29 @@ int main()
     int screenHeight = 600;
     InitWindow(screenWidth, screenHeight, "Connect 4");
 
+    //Init game class
+    int playerAmount{ 2 };
     Game game(static_cast<float>(screenWidth), static_cast<float>(screenHeight));
-    Player firstPlayer;
-    Player secondPlayer;
+
+
+    // init players, add to game and set colors.
+    for (int i = 1; i < playerAmount; i++){
+
+    }
+    std::vector<Player> playerInit(playerAmount);
+    int pCount{1};
+    for (auto player : playerInit){
+        player
+    }
+    Player playerFirst(1);
+    Player playerSecond(2);
+    game.addPlayer(playerFirst);
+    game.addPlayer(playerSecond);
+    game.setPlayerColor(playerFirst, RED);
+    game.setPlayerColor(playerSecond, YELLOW);
+
+    game.setTurnPlayer(playerFirst);
+    game.getTurnPlayer();
 
     Vector2 mousePos{};
 
@@ -48,7 +69,7 @@ int main()
         ClearBackground(BLACK);
         BeginDrawing();
 
-        game.draw();
+        game.draw(game.getTurnPlayer());
 
         EndDrawing();
     }
