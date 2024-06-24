@@ -1,31 +1,36 @@
 #include "game.h"
 
-Game::Game(float screenWidth, float screenHeight) :
-    screenWidth(screenWidth),
-    screenHeight(screenHeight)
+Game::Game(float screenWidth,
+           float screenHeight) : screenWidth(screenWidth),
+                                 screenHeight(screenHeight),
+                                 turnPlayer(players[0])
+
 {
-    for (int i = 0; i < COLS; i++)
+    // set game colors
+    colors[0] = {true, RED};
+    colors[1] = {true, YELLOW};
+    colors[2] = {true, GREEN};
+    colors[3] = {true, ORANGE};
+
+    Game::setPlayerColor(players[0], 1);
+    Game::setPlayerColor(players[1], 2);
+
+    for (int i = 0; i < ROWS; ++i)
     {
         // setup the grid
-        grid.push_back(std::vector<Cell>(cell));
-        for (int j = 0; j < ROWS; j++)
+        grid2d.push_back(std::vector<Cell>({}));
+        for (int j = 0; j < COLS; ++j)
         {
-            grid[i].push_back({
-                    .row = j + 1, // col
-                    .column = i + 1, // row
-                    .rec = Rectangle{
-                        static_cast<float>(recSrc.x + (i * recSrc.width / COLS)),
-                        static_cast<float>(recSrc.y + (j * recSrc.height)),
-                        static_cast<float>(recSrc.width / COLS),
-                        static_cast<float>(recSrc.height / ROWS)},
-                });
+            grid2d[i].push_back((Cell){i,
+                                       j,
+                                       Rectangle{
+                                           static_cast<float>(recSrc.x + (i * (recSrc.width / ROWS))),
+                                           static_cast<float>(recSrc.y + (j * (recSrc.height / COLS))),
+                                           static_cast<float>(recSrc.width / ROWS),
+                                           static_cast<float>(recSrc.height / COLS)},
+                                       recSrc});
         }
     }
-    colors[0] = { true, RED };
-    colors[1] = { true, YELLOW };
-    colors[2] = { true, GREEN };
-    colors[3] = { true, ORANGE };
-
 };
 
 void Game::updateRes(float newScreenWidth, float newScreenHeight)
@@ -35,82 +40,156 @@ void Game::updateRes(float newScreenWidth, float newScreenHeight)
     screenHeight = newScreenHeight;
     width = screenWidth * 0.75f;
     height = screenHeight * 0.75f;
-    screenPos = Vector2{ (screenWidth - width) / 2.f, (screenHeight - height) / 2.f };
+    screenPos = Vector2{(screenWidth - width) / 2.f, (screenHeight - height) / 2.f};
     recSrc = Rectangle{
         screenPos.x,
         screenPos.y,
         width,
-        height };
+        height};
 
     // UPDATE 2D GRID ARRAY
-    for (int i = 0; i < COLS; i++)
+    for (int i = 0; i < ROWS; ++i)
     {
-        for (int j = 0; j < ROWS; j++)
+        for (int j = 0; j < COLS; ++j)
         {
-            grid[i][j].rec = { Rectangle{
-                        static_cast<float>(recSrc.x + (i * recSrc.width)),
-                        static_cast<float>(recSrc.y + (j * recSrc.height)),
-                        static_cast<float>(recSrc.width / COLS),
-                        static_cast<float>(recSrc.height / ROWS)},
-            };
+            grid2d[i][j].updateGameRec(recSrc);
+            grid2d[i][j].updateCellRec(Rectangle{
+                static_cast<float>(grid2d[i][j].getGameRec().x + ((grid2d[i][j].getRowPos()) * (grid2d[i][j].getGameRec().width / ROWS))),
+                static_cast<float>(grid2d[i][j].getGameRec().y + ((grid2d[i][j].getColumnPos()) * (grid2d[i][j].getGameRec().height / COLS))),
+                static_cast<float>(grid2d[i][j].getGameRec().width / ROWS),
+                static_cast<float>(grid2d[i][j].getGameRec().height / COLS)});
         }
     }
 };
 
-void Game::draw(Player player)
+void Game::draw()
 {
-    Color color{ WHITE };
     DrawRectangle(recSrc.x, recSrc.y, recSrc.width, recSrc.height, BLUE);
-    for (int i = 0; i < COLS; i++)
+    /* for (int i = 0; i < ROWS; ++i)
     {
-        for (int j = 0; j < ROWS; j++)
+        for (int j = 0; j < COLS; ++j)
         {
-            Cell cell = grid[i][j];
-            color = !cell.blank ? player.getPlayerColor() : WHITE;
-            DrawRectangleLines(recSrc.x + (i * cell.rec.width),
-                recSrc.y + (j * cell.rec.height),
-                cell.rec.width,
-                cell.rec.height,
-                BLACK);
-            DrawCircle(recSrc.x + (i * cell.rec.width) + (cell.rec.width / 2),
-                recSrc.y + (j * cell.rec.height) + (cell.rec.height / 2),
-                ((cell.rec.width + cell.rec.height) / 2) * 0.33f,
-                color); // will have to draw these white circles after the falling coin for visual effect of going down a hole.
-            string posY{ "Col: " };
-            posY.append(to_string(cell.column), 0, 10);
-            string posX{ "Row: " };
-            posX.append(to_string(cell.row), 0, 10).append("\n" + posY);
-            DrawText(posX.c_str(), recSrc.x + (i * cell.rec.width), recSrc.y + (j * cell.rec.height) + (cell.rec.height / 2), std::clamp(GetFontDefault().baseSize, 10, 24), RED);
+            grid2d[i][j].drawCoin();
+            // delete when finished
+            std::string posY{"Col: "};
+            posY.append(std::to_string(grid2d[i][j].getColumnPos()), 0, 10);
+            std::string posX{"Row: "};
+            posX.append(std::to_string((grid2d[i][j].getRowPos())), 0, 10).append("\n" + posY);
+            DrawText(posX.c_str(),
+                     recSrc.x + (i * grid2d[i][j].getCellRec().width),
+                     recSrc.y + (j * grid2d[i][j].getCellRec().height),
+                     14,
+                     RED);
         }
-
+    } */
+    for (auto row : grid2d)
+    {
+        for (auto col = row.begin(); col != row.end(); ++col)
+        {
+            col->drawCoin();
+            // delete when finished
+            std::string posY{"Col: "};
+            posY.append(std::to_string(col->getColumnPos()), 0, 10);
+            std::string posX{"Row: "};
+            posX.append(std::to_string((col->getRowPos())), 0, 10).append("\n" + posY);
+            DrawText(posX.c_str(),
+                     recSrc.x + (col->getRowPos() * col->getCellRec().width),
+                     recSrc.y + (col->getColumnPos() * col->getCellRec().height),
+                     14,
+                     RED);
+        }
     }
 };
 
-void Game::tick(Player player) {
-    // need to check each cell if mouse is clicking it
-    for (int i = 0; i < COLS; i++)
+void Game::tick(Vector2 mousePos)
+{
+    for (int i = 0; i < ROWS; ++i)
     {
-        for (int j = ROWS; j > 0; j--) // Work backwards, starting from the end of the column checking each cell for blank = true.
+        for (int j = 0; j < COLS; ++j)
         {
-            if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) &&
-                CheckCollisionPointRec(GetMousePosition(), grid[i][j].rec) &&
-                grid[i][j].blank)
+            /* int index = (i * COLS) + j;
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+                CheckCollisionPointRec(mousePos, grid[index].getCellRec()))
             {
-                DrawCircle(
-                    recSrc.x + (recSrc.width / 2) + (i * recSrc.width / COLS),
-                    grid[i][j].rec.y + grid[i][j].rec.height, ((grid[i][j].rec.width + grid[i][j].rec.height) / 2) * 0.33f, player.getPlayerColor());
-                player.tick();
-                grid[i][j].blank = false;
-                goto stop;
+                if (grid[index].isBlank())
+                {
+                    grid[index].updateCell(players[playerIndex]);
+                    players[playerIndex].tick();
+                    playerIndex = -playerIndex + 1;
+                    Game::setTurnPlayer(players[playerIndex]);
+                    std::cout << "Position: " << "(" << grid[index].getRowPos() - 1 << "," << grid[index].getColumnPos() - 1 << ")" << std::endl;
+                    std::cout << "Owned by? " << grid[index].getOwner().getName() << std::endl;
+                    std::cout << "blank? " << grid[index].isBlank() << std::endl;
+                    std::cout << "Color: " << std::to_string(grid[index].getOwner().getPlayerColor().r).c_str() << ", " << std::to_string(grid[index].getOwner().getPlayerColor().b).c_str() << ", " << std::to_string(grid[index].getOwner().getPlayerColor().g).c_str() << ", " << std::to_string(grid[index].getOwner().getPlayerColor().a).c_str() << std::endl;
+                    std::cout << "Number of turns left: " << grid[index].getOwner().getNumOfCoinsLeft() << "\n"
+                              << std::endl;
+                }
+            } */
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+                CheckCollisionPointRec(mousePos, grid2d[i][j].getCellRec()))
+            {
+                if (grid2d[i][j].isBlank())
+                {
+                    grid2d[i][j].updateCell(players[playerIndex]);
+                    players[playerIndex].tick();
+                    playerIndex = -playerIndex + 1;
+                    Game::setTurnPlayer(players[playerIndex]);
+                    std::cout << "Position: " << "(" << grid2d[i][j].getRowPos() << "," << grid2d[i][j].getColumnPos() << ")" << std::endl;
+                    std::cout << "Owned by? " << grid2d[i][j].getOwner().getName() << std::endl;
+                    std::cout << "blank? " << grid2d[i][j].isBlank() << std::endl;
+                    std::cout << "Color: " << std::to_string(grid2d[i][j].getOwner().getPlayerColor().r).c_str() << ", " << std::to_string(grid2d[i][j].getOwner().getPlayerColor().b).c_str() << ", " << std::to_string(grid2d[i][j].getOwner().getPlayerColor().g).c_str() << ", " << std::to_string(grid2d[i][j].getOwner().getPlayerColor().a).c_str() << std::endl;
+                    std::cout << "Number of turns left: " << grid2d[i][j].getOwner().getNumOfCoinsLeft() << "\n"
+                              << std::endl;
+                }
             }
         }
     }
-stop:
-    return;
+    /* for (auto row : grid)
+    {
+        for (auto cell = row.rbegin(); cell != row.rend(); ++cell)
+        {
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+                CheckCollisionPointRec(mousePos, cell->getCellRec()))
+            {
+                if (cell->isBlank())
+                {
+                    cell->updateCell(players[playerIndex]);
+                    Game::setPrevPlayer(players[playerIndex]);
+                    players[playerIndex].tick();
+                    playerIndex = static_cast<int>((playerIndex + 1) % numOfPlayers);
+                    Game::setTurnPlayer(players[playerIndex]);
+                    std::cout << "Position: " << "(" << cell->getRowPos() - 1 << "," << cell->getColumnPos() - 1 << ")" << std::endl;
+                    std::cout << "Owned by? " << cell->getOwner().getName() << std::endl;
+                    std::cout << "blank? " << cell->isBlank() << std::endl;
+                    std::cout << "Color: " << std::to_string(cell->getOwner().getPlayerColor().r).c_str() << ", " << std::to_string(cell->getOwner().getPlayerColor().b).c_str() << ", " << std::to_string(cell->getOwner().getPlayerColor().g).c_str() << ", " << std::to_string(cell->getOwner().getPlayerColor().a).c_str() << std::endl;
+                }
+            }
+        }
+    } */
 };
 
-void Game::setPlayerColor(Player player, Color color) {
-    for (int i = 0; i < sizeOfPlayerColors; i++)
+void Game::setPlayerColor(Player player, int n)
+{
+    Color color;
+    switch (n)
+    {
+    case 1:
+        color = RED;
+        break;
+    case 2:
+        color = YELLOW;
+        break;
+    case 3:
+        color = GREEN;
+        break;
+    case 4:
+        color = ORANGE;
+        break;
+    default:
+        color = BLACK;
+        break;
+    }
+    for (int i = 0; i < sizeOfPlayerColors; ++i)
     {
         if (color.r == colors[i].color.r &&
             color.g == colors[i].color.g &&
@@ -126,5 +205,4 @@ void Game::setPlayerColor(Player player, Color color) {
             colors[i].available = true;
         }
     }
-
 }

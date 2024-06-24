@@ -1,7 +1,6 @@
 #include "raylib.h"
 #include "game.h"
 #include "player.h"
-#include <vector>
 
 int main()
 {
@@ -11,65 +10,42 @@ int main()
     int screenHeight = 600;
     InitWindow(screenWidth, screenHeight, "Connect 4");
 
-    //Init game class
-    int playerAmount{ 2 };
+    // Init game class
     Game game(static_cast<float>(screenWidth), static_cast<float>(screenHeight));
 
-
-    // init players, add to game and set colors.
-    for (int i = 1; i < playerAmount; i++){
-
-    }
-    std::vector<Player> playerInit(playerAmount);
-    int pCount{1};
-    for (auto player : playerInit){
-        player
-    }
-    Player playerFirst(1);
-    Player playerSecond(2);
-    game.addPlayer(playerFirst);
-    game.addPlayer(playerSecond);
-    game.setPlayerColor(playerFirst, RED);
-    game.setPlayerColor(playerSecond, YELLOW);
-
-    game.setTurnPlayer(playerFirst);
-    game.getTurnPlayer();
-
     Vector2 mousePos{};
-
-    std::vector<Rectangle> clickableColumn(Rectangle);
 
     SetTargetFPS(60);
     while (!WindowShouldClose())
     {
         // Logic
         //--------------------------------------------------------------------------------------/
-        float dT{ GetFrameTime() };
+        // float dT{GetFrameTime()};
         mousePos = GetMousePosition();
 
-
-        //collision check for clickable column area to drop coin
+        // collision check for clickable column area to drop coin
 
         if (IsWindowResized() && !IsWindowFullscreen())
         {
             screenWidth = GetScreenWidth();
             screenHeight = GetScreenHeight();
+            game.updateRes(screenWidth, screenHeight);
         }
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
         {
             ToggleFullscreen();
         }
 
-        if (IsWindowResized() || IsWindowFullscreen())
-        {
-            game.updateRes(static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight()));
-        }
-
         //--------------------------------------------------------------------------------------/
         ClearBackground(BLACK);
         BeginDrawing();
 
-        game.draw(game.getTurnPlayer());
+        // player turn text
+        DrawText(std::string("Turn: ").append(game.getTurnPlayer().getName()).c_str(), 20, 20, 40, RED);
+        // DRAW EVERYTHING
+        game.draw();
+        // game actions
+        game.tick(mousePos);
 
         EndDrawing();
     }
