@@ -5,7 +5,13 @@ Player::Player(int playerNumber) : playerNumber(playerNumber)
     name.append(std::to_string(playerNumber));
 };
 
-Color Player::setPlayerColor(Color newColor) { return playerColor = newColor; }
+void Player::setPlayerColor(Color& newColor) {
+    playerColor = newColor;
+}
+
+void Player::setPlayerTexture(Texture2D coin) {
+    playerCoinTexture = coin;
+}
 
 void Player::tick()
 {

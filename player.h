@@ -11,17 +11,20 @@ public:
     void tick();
     int getPlayerNumber() { return playerNumber; }
     Color getPlayerColor() { return playerColor; }
-    Color setPlayerColor(Color newColor);
+    void setPlayerColor(Color& newColor);
+    Texture2D getPlayerCoinTexture() { return playerCoinTexture; }
+    void setPlayerTexture(Texture2D coin);
     int getCoins() { return numOfCoinsLeft; }
     std::string getName() { return name; }
     int getNumOfCoinsLeft() { return numOfCoinsLeft; }
 
 private:
-    Color playerColor;
+    Color playerColor{};
+    Texture2D playerCoinTexture{};
     int playerNumber{};
-    int numOfCoinsLeft{21};
-    bool hasTurns{true};
-    std::string name{"Player "};
+    int numOfCoinsLeft{ 21 };
+    bool hasTurns{ true };
+    std::string name{ "Player " };
 };
 
 #endif

@@ -9,7 +9,7 @@ class Player;
 class Cell
 {
 public:
-    Cell(int row, int col, Rectangle cellRec, Rectangle gameRec);
+    Cell(int col, int row, Rectangle cellRec, Rectangle gameRec, Texture2D texture);
     int getRowPos() { return row; }
     int getColumnPos() { return column; }
     bool isBlank() { return blank; }
@@ -17,9 +17,11 @@ public:
     Rectangle getCellRec() { return cellRec; }
     void updateCellRec(Rectangle newRec) { cellRec = newRec; }
     Player getOwner() { return owner; }
-    void updateCell(Player player);
+    void updateCell(Player& player);
     Rectangle getGameRec() { return gameRec; }
-    void updateGameRec(Rectangle &newGameRec) { gameRec = newGameRec; }
+    void updateGameRec(Rectangle& newGameRec) { gameRec = newGameRec; }
+
+    void updateTexture(Texture2D coin) { tex = coin; }
 
     void drawCoin();
 
@@ -27,11 +29,12 @@ protected:
     void drawCoinDrop();
 
 private:
-    int row{};
     int column{};
-    bool blank{true};
+    int row{};
     Rectangle cellRec{};
-    Player owner{0};
     Rectangle gameRec{};
+    bool blank{ true };
+    Player owner{ 0 };
+    Texture2D tex{};
 };
 #endif

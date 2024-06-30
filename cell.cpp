@@ -1,6 +1,6 @@
 #include "cell.h"
 
-Cell::Cell(int row, int col, Rectangle cellRec, Rectangle gameRec) : row(row), column(col), cellRec(cellRec), gameRec(gameRec){};
+Cell::Cell(int col, int row, Rectangle cellRec, Rectangle gameRec, Texture2D texture) : column(col), row(row), cellRec(cellRec), gameRec(gameRec), tex(texture) {};
 
 void Cell::drawCoinDrop()
 {
@@ -14,23 +14,12 @@ void Cell::drawCoinDrop()
 };
 void Cell::drawCoin()
 {
-    if (owner.getPlayerNumber() == 0)
-    {
-        DrawCircle(gameRec.x + (row * cellRec.width) + (cellRec.width / 2),
-                   gameRec.y + (column * cellRec.height) + (cellRec.height / 2),
-                   ((cellRec.width + cellRec.height) / 2) * 0.33f,
-                   WHITE);
-        return;
-    }
-    DrawCircle(gameRec.x + (row * cellRec.width) + (cellRec.width / 2),
-               gameRec.y + (column * cellRec.height) + (cellRec.height / 2),
-               ((cellRec.width + cellRec.height) / 2) * 0.33f,
-               owner.getPlayerColor());
-    return;
+    DrawTexturePro(tex, Rectangle{ 0.f, 0.f, static_cast<float>(tex.width), static_cast<float>(tex.height) }, cellRec, {}, 0.f, WHITE);
 };
 
-void Cell::updateCell(Player player)
+void Cell::updateCell(Player& player)
 {
     blank = false;
     owner = player;
+    updateTexture(owner.getPlayerCoinTexture());
 };

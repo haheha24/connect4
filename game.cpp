@@ -1,34 +1,40 @@
 #include "game.h"
 
 Game::Game(float screenWidth,
-           float screenHeight) : screenWidth(screenWidth),
-                                 screenHeight(screenHeight),
-                                 turnPlayer(players[0])
+    float screenHeight,
+    std::vector<Player>& players,
+    std::vector<Texture2D>& coins) : screenWidth(screenWidth),
+    screenHeight(screenHeight),
+    turnPlayer(players[0]),
+    coins(coins)
 
 {
     // set game colors
-    colors[0] = {true, RED};
-    colors[1] = {true, YELLOW};
-    colors[2] = {true, GREEN};
-    colors[3] = {true, ORANGE};
+    colors[0] = { true, RED, coins[1] };
+    colors[1] = { true, YELLOW, coins[2] };
+    /* colors[2] = { true, GREEN, coins[3] };
+    colors[3] = { true, ORANGE, coins[4] }; */
 
     Game::setPlayerColor(players[0], 1);
     Game::setPlayerColor(players[1], 2);
 
-    for (int i = 0; i < ROWS; ++i)
+    for (int i = 0; i < COLS; ++i)
     {
         // setup the grid
         grid2d.push_back(std::vector<Cell>({}));
-        for (int j = 0; j < COLS; ++j)
+        for (int j = 0; j < ROWS; ++j)
         {
-            grid2d[i].push_back((Cell){i,
-                                       j,
-                                       Rectangle{
-                                           static_cast<float>(recSrc.x + (i * (recSrc.width / ROWS))),
-                                           static_cast<float>(recSrc.y + (j * (recSrc.height / COLS))),
-                                           static_cast<float>(recSrc.width / ROWS),
-                                           static_cast<float>(recSrc.height / COLS)},
-                                       recSrc});
+            grid2d[i].push_back((Cell) {
+                i,
+                    j,
+                    Rectangle{
+                        static_cast<float>(recSrc.x + (i * (recSrc.width / COLS))),
+                        static_cast<float>(recSrc.y + (j * (recSrc.height / ROWS))),
+                        static_cast<float>(recSrc.width / COLS),
+                        static_cast<float>(recSrc.height / ROWS) },
+                        recSrc,
+                        coins[0]
+            });
         }
     }
 };
@@ -40,24 +46,24 @@ void Game::updateRes(float newScreenWidth, float newScreenHeight)
     screenHeight = newScreenHeight;
     width = screenWidth * 0.75f;
     height = screenHeight * 0.75f;
-    screenPos = Vector2{(screenWidth - width) / 2.f, (screenHeight - height) / 2.f};
+    screenPos = Vector2{ (screenWidth - width) / 2.f, (screenHeight - height) / 2.f };
     recSrc = Rectangle{
         screenPos.x,
         screenPos.y,
         width,
-        height};
+        height };
 
     // UPDATE 2D GRID ARRAY
-    for (int i = 0; i < ROWS; ++i)
+    for (auto& col : grid2d)
     {
-        for (int j = 0; j < COLS; ++j)
+        for (auto row = col.begin(); row != col.end(); ++row)
         {
-            grid2d[i][j].updateGameRec(recSrc);
-            grid2d[i][j].updateCellRec(Rectangle{
-                static_cast<float>(grid2d[i][j].getGameRec().x + ((grid2d[i][j].getRowPos()) * (grid2d[i][j].getGameRec().width / ROWS))),
-                static_cast<float>(grid2d[i][j].getGameRec().y + ((grid2d[i][j].getColumnPos()) * (grid2d[i][j].getGameRec().height / COLS))),
-                static_cast<float>(grid2d[i][j].getGameRec().width / ROWS),
-                static_cast<float>(grid2d[i][j].getGameRec().height / COLS)});
+            row->updateGameRec(recSrc);
+            row->updateCellRec(Rectangle{
+                static_cast<float>(row->getGameRec().x + ((row->getColumnPos()) * (row->getGameRec().width / COLS))),
+                static_cast<float>(row->getGameRec().y + ((row->getRowPos()) * (row->getGameRec().height / ROWS))),
+                static_cast<float>(row->getGameRec().width / COLS),
+                static_cast<float>(row->getGameRec().height / ROWS) });
         }
     }
 };
@@ -65,110 +71,57 @@ void Game::updateRes(float newScreenWidth, float newScreenHeight)
 void Game::draw()
 {
     DrawRectangle(recSrc.x, recSrc.y, recSrc.width, recSrc.height, BLUE);
-    /* for (int i = 0; i < ROWS; ++i)
+    for (auto& col : grid2d)
     {
-        for (int j = 0; j < COLS; ++j)
+        for (auto row = col.begin(); row != col.end(); ++row)
         {
-            grid2d[i][j].drawCoin();
+            row->drawCoin();
             // delete when finished
-            std::string posY{"Col: "};
-            posY.append(std::to_string(grid2d[i][j].getColumnPos()), 0, 10);
-            std::string posX{"Row: "};
-            posX.append(std::to_string((grid2d[i][j].getRowPos())), 0, 10).append("\n" + posY);
+            /* std::string blank{ "Blank: " };
+            blank.append(std::to_string(row->isBlank()), 0, 10);
+            std::string owner{ row->getOwner().getName() };
+            owner.append("\n" + blank);
+            std::string posY{ "Row: " };
+            posY.append(std::to_string(row->getRowPos()), 0, 10).append("\n" + owner);
+            std::string posX{ "Col: " };
+            posX.append(std::to_string((row->getColumnPos())), 0, 10).append("\n" + posY);
             DrawText(posX.c_str(),
-                     recSrc.x + (i * grid2d[i][j].getCellRec().width),
-                     recSrc.y + (j * grid2d[i][j].getCellRec().height),
-                     14,
-                     RED);
-        }
-    } */
-    for (auto row : grid2d)
-    {
-        for (auto col = row.begin(); col != row.end(); ++col)
-        {
-            col->drawCoin();
-            // delete when finished
-            std::string posY{"Col: "};
-            posY.append(std::to_string(col->getColumnPos()), 0, 10);
-            std::string posX{"Row: "};
-            posX.append(std::to_string((col->getRowPos())), 0, 10).append("\n" + posY);
-            DrawText(posX.c_str(),
-                     recSrc.x + (col->getRowPos() * col->getCellRec().width),
-                     recSrc.y + (col->getColumnPos() * col->getCellRec().height),
-                     14,
-                     RED);
+                recSrc.x + (row->getColumnPos() * row->getCellRec().width),
+                recSrc.y + (row->getRowPos() * row->getCellRec().height),
+                11,
+                BLACK); */
         }
     }
 };
 
-void Game::tick(Vector2 mousePos)
+void Game::tick(Vector2 mousePos, std::vector<Player>& players)
 {
-    for (int i = 0; i < ROWS; ++i)
+    for (auto& col : grid2d)
     {
-        for (int j = 0; j < COLS; ++j)
+        for (auto row = col.begin(); row != col.end(); ++row)
         {
-            /* int index = (i * COLS) + j;
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
-                CheckCollisionPointRec(mousePos, grid[index].getCellRec()))
+                CheckCollisionPointRec(mousePos, row->getCellRec()))
             {
-                if (grid[index].isBlank())
+                if (row->isBlank() && row->getOwner().getPlayerNumber() == 0)
                 {
-                    grid[index].updateCell(players[playerIndex]);
+                    row->updateCell(players[playerIndex]);
                     players[playerIndex].tick();
                     playerIndex = -playerIndex + 1;
                     Game::setTurnPlayer(players[playerIndex]);
-                    std::cout << "Position: " << "(" << grid[index].getRowPos() - 1 << "," << grid[index].getColumnPos() - 1 << ")" << std::endl;
-                    std::cout << "Owned by? " << grid[index].getOwner().getName() << std::endl;
-                    std::cout << "blank? " << grid[index].isBlank() << std::endl;
-                    std::cout << "Color: " << std::to_string(grid[index].getOwner().getPlayerColor().r).c_str() << ", " << std::to_string(grid[index].getOwner().getPlayerColor().b).c_str() << ", " << std::to_string(grid[index].getOwner().getPlayerColor().g).c_str() << ", " << std::to_string(grid[index].getOwner().getPlayerColor().a).c_str() << std::endl;
-                    std::cout << "Number of turns left: " << grid[index].getOwner().getNumOfCoinsLeft() << "\n"
-                              << std::endl;
-                }
-            } */
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
-                CheckCollisionPointRec(mousePos, grid2d[i][j].getCellRec()))
-            {
-                if (grid2d[i][j].isBlank())
-                {
-                    grid2d[i][j].updateCell(players[playerIndex]);
-                    players[playerIndex].tick();
-                    playerIndex = -playerIndex + 1;
-                    Game::setTurnPlayer(players[playerIndex]);
-                    std::cout << "Position: " << "(" << grid2d[i][j].getRowPos() << "," << grid2d[i][j].getColumnPos() << ")" << std::endl;
-                    std::cout << "Owned by? " << grid2d[i][j].getOwner().getName() << std::endl;
-                    std::cout << "blank? " << grid2d[i][j].isBlank() << std::endl;
-                    std::cout << "Color: " << std::to_string(grid2d[i][j].getOwner().getPlayerColor().r).c_str() << ", " << std::to_string(grid2d[i][j].getOwner().getPlayerColor().b).c_str() << ", " << std::to_string(grid2d[i][j].getOwner().getPlayerColor().g).c_str() << ", " << std::to_string(grid2d[i][j].getOwner().getPlayerColor().a).c_str() << std::endl;
-                    std::cout << "Number of turns left: " << grid2d[i][j].getOwner().getNumOfCoinsLeft() << "\n"
-                              << std::endl;
+                    std::cout << "Position: " << "(" << row->getRowPos() << "," << row->getColumnPos() << ")" << std::endl;
+                    std::cout << "Owned by? " << row->getOwner().getName() << std::endl;
+                    std::cout << "blank? " << row->isBlank() << std::endl;
+                    std::cout << "Color: " << std::to_string(row->getOwner().getPlayerColor().r).c_str() << ", " << std::to_string(row->getOwner().getPlayerColor().b).c_str() << ", " << std::to_string(row->getOwner().getPlayerColor().g).c_str() << ", " << std::to_string(row->getOwner().getPlayerColor().a).c_str() << std::endl;
+                    std::cout << "Number of turns left: " << row->getOwner().getNumOfCoinsLeft() << "\n"
+                        << std::endl;
                 }
             }
         }
     }
-    /* for (auto row : grid)
-    {
-        for (auto cell = row.rbegin(); cell != row.rend(); ++cell)
-        {
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
-                CheckCollisionPointRec(mousePos, cell->getCellRec()))
-            {
-                if (cell->isBlank())
-                {
-                    cell->updateCell(players[playerIndex]);
-                    Game::setPrevPlayer(players[playerIndex]);
-                    players[playerIndex].tick();
-                    playerIndex = static_cast<int>((playerIndex + 1) % numOfPlayers);
-                    Game::setTurnPlayer(players[playerIndex]);
-                    std::cout << "Position: " << "(" << cell->getRowPos() - 1 << "," << cell->getColumnPos() - 1 << ")" << std::endl;
-                    std::cout << "Owned by? " << cell->getOwner().getName() << std::endl;
-                    std::cout << "blank? " << cell->isBlank() << std::endl;
-                    std::cout << "Color: " << std::to_string(cell->getOwner().getPlayerColor().r).c_str() << ", " << std::to_string(cell->getOwner().getPlayerColor().b).c_str() << ", " << std::to_string(cell->getOwner().getPlayerColor().g).c_str() << ", " << std::to_string(cell->getOwner().getPlayerColor().a).c_str() << std::endl;
-                }
-            }
-        }
-    } */
 };
 
-void Game::setPlayerColor(Player player, int n)
+void Game::setPlayerColor(Player& player, int n)
 {
     Color color;
     switch (n)
@@ -197,7 +150,8 @@ void Game::setPlayerColor(Player player, int n)
             color.a == colors[i].color.a &&
             colors[i].available)
         {
-            player.setPlayerColor(color);
+            player.setPlayerColor(colors[i].color);
+            player.setPlayerTexture(colors[i].coin);
             colors[i].available = false;
         }
         else

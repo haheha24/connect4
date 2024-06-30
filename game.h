@@ -15,41 +15,41 @@ class Cell;
 class Game
 {
 public:
-    Game(float screenWidth, float screenHeight);
+    Game(float screenWidth, float screenHeight, std::vector<Player>& players, std::vector<Texture2D>& coins);
     void updateRes(float newScreenWidth, float newScreenHeight);
     void draw();
-    void tick(Vector2 mousePos);
-    std::vector<Player> getPlayers() { return players; }
-    void setPlayerColor(Player player, int n);
+    void tick(Vector2 mousePos, std::vector<Player>& players);
+    void setPlayerColor(Player& player, int n);
     Player getTurnPlayer() { return turnPlayer; }
     void setTurnPlayer(Player player) { turnPlayer = player; }
     void setPlayerIndex(int idx) { playerIndex = idx; }
     int getPlayerIndex() { return playerIndex; }
 
 private:
-    static constexpr int COLS{7};
-    static constexpr int ROWS{6};
+    static constexpr int COLS{ 7 };
+    static constexpr int ROWS{ 6 };
     float screenWidth{};
     float screenHeight{};
-    float width{screenWidth * 0.75f};
-    float height{screenHeight * 0.75f};
-    Vector2 screenPos{(screenWidth - width) / 2.f, (screenHeight - height) / 2.f};
+    float width{ screenWidth * 0.75f };
+    float height{ screenHeight * 0.75f };
+    Vector2 screenPos{ (screenWidth - width) / 2.f, (screenHeight - height) / 2.f };
     Rectangle recSrc{
         screenPos.x,
         screenPos.y,
         width,
-        height};
+        height };
     std::vector<std::vector<Cell>> grid2d;
-    std::vector<Player> players{Player(1), Player(2)};
     Player turnPlayer{};
-    int playerIndex{0};
+    int playerIndex{ 0 };
     struct PlayerColor
     {
-        bool available{true};
+        bool available{ true };
         Color color;
+        Texture2D coin;
     };
-    static const int sizeOfPlayerColors{4};
+    static const int sizeOfPlayerColors{ 2 };
     PlayerColor colors[sizeOfPlayerColors];
+    std::vector<Texture2D> coins{};
 };
 
 #endif
