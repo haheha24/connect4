@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "textureLoader.h"
 #include "game.h"
 #include "player.h"
 
@@ -11,17 +12,13 @@ int main()
     InitWindow(screenWidth, screenHeight, "Connect 4");
 
     // Load Textures
-    Texture2D blankCoin{ LoadTexture("textures/blankCoin.png") };
-    Texture2D redCoin{ LoadTexture("textures/redCheeky.png") };
-    Texture2D yellowCoin{ LoadTexture("textures/yellowChill.png") };
-    // Vector of coins
-    std::vector<Texture2D> coins{ blankCoin,redCoin, yellowCoin };
+    TextureLoader textureManager;
 
     // Init players
     std::vector<Player> players{ Player(1), Player(2) };
 
     // Init game class
-    Game game(static_cast<float>(screenWidth), static_cast<float>(screenHeight), players, coins);
+    Game game(textureManager, static_cast<float>(screenWidth), static_cast<float>(screenHeight), players);
 
     Vector2 mousePos{};
 
@@ -30,7 +27,6 @@ int main()
     {
         // Logic
         //--------------------------------------------------------------------------------------/
-        // float dT{GetFrameTime()};
         mousePos = GetMousePosition();
 
         // collision check for clickable column area to drop coin
@@ -62,8 +58,6 @@ int main()
         EndDrawing();
         //--------------------------------------------------------------------------------------/
     }
-    UnloadTexture(blankCoin);
-    UnloadTexture(redCoin);
-    UnloadTexture(yellowCoin);
+    textureManager.unloadTextures();
     CloseWindow();
 }

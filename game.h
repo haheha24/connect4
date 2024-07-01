@@ -6,6 +6,7 @@
 #include <map>
 #include <vector>
 #include "raylib.h"
+#include "textureLoader.h"
 #include "player.h"
 #include "cell.h"
 
@@ -15,7 +16,7 @@ class Cell;
 class Game
 {
 public:
-    Game(float screenWidth, float screenHeight, std::vector<Player>& players, std::vector<Texture2D>& coins);
+    Game(TextureLoader& textureManager, float screenWidth, float screenHeight, std::vector<Player>& players);
     void updateRes(float newScreenWidth, float newScreenHeight);
     void draw();
     void tick(Vector2 mousePos, std::vector<Player>& players);
@@ -26,6 +27,8 @@ public:
     int getPlayerIndex() { return playerIndex; }
 
 private:
+
+    TextureLoader textureManager{};
     static constexpr int COLS{ 7 };
     static constexpr int ROWS{ 6 };
     float screenWidth{};
@@ -49,7 +52,7 @@ private:
     };
     static const int sizeOfPlayerColors{ 2 };
     PlayerColor colors[sizeOfPlayerColors];
-    std::vector<Texture2D> coins{};
+    // I want to create a function that will return every cell with the same column sorted by the highest to lowest row (in reverse to the grid2d)
 };
 
 #endif

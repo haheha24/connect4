@@ -1,17 +1,17 @@
 #include "game.h"
 
-Game::Game(float screenWidth,
+Game::Game(TextureLoader& textureManager,
+    float screenWidth,
     float screenHeight,
-    std::vector<Player>& players,
-    std::vector<Texture2D>& coins) : screenWidth(screenWidth),
+    std::vector<Player>& players) :
+    textureManager(textureManager),
+    screenWidth(screenWidth),
     screenHeight(screenHeight),
-    turnPlayer(players[0]),
-    coins(coins)
-
+    turnPlayer(players[0])
 {
     // set game colors
-    colors[0] = { true, RED, coins[1] };
-    colors[1] = { true, YELLOW, coins[2] };
+    colors[0] = { true, RED, textureManager.getTexture("redCoin") };
+    colors[1] = { true, YELLOW, textureManager.getTexture("yellowCoin") };
     /* colors[2] = { true, GREEN, coins[3] };
     colors[3] = { true, ORANGE, coins[4] }; */
 
@@ -33,7 +33,7 @@ Game::Game(float screenWidth,
                         static_cast<float>(recSrc.width / COLS),
                         static_cast<float>(recSrc.height / ROWS) },
                         recSrc,
-                        coins[0]
+                        textureManager.getTexture("blankCoin")
             });
         }
     }
