@@ -15,6 +15,11 @@ class Cell;
 
 class Game
 {
+protected:
+    typedef struct {
+        bool gameover;
+        int winner;
+    } GameState;
 public:
     Game(TextureLoader& textureManager, float screenWidth, float screenHeight, std::vector<Player>& players);
     void updateRes(float newScreenWidth, float newScreenHeight);
@@ -25,9 +30,8 @@ public:
     void setTurnPlayer(Player player) { turnPlayer = player; }
     void setPlayerIndex(int idx) { playerIndex = idx; }
     int getPlayerIndex() { return playerIndex; }
-
+    GameState getGameState();
 private:
-
     TextureLoader textureManager{};
     static constexpr int COLS{ 7 };
     static constexpr int ROWS{ 6 };
@@ -52,7 +56,9 @@ private:
     };
     static const int sizeOfPlayerColors{ 2 };
     PlayerColor colors[sizeOfPlayerColors];
-    // I want to create a function that will return every cell with the same column sorted by the highest to lowest row (in reverse to the grid2d)
+    bool gameover{ false };
+    int winner{ 0 };
+    void checkConnect4(Player &player);
 };
 
 #endif

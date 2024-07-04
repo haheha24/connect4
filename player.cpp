@@ -15,5 +15,5 @@ void Player::setPlayerTexture(Texture2D coin) {
 
 void Player::tick()
 {
-    numOfCoinsLeft > 0 ? numOfCoinsLeft -= 1 : hasTurns = false;
+    if (numOfCoinsLeft > 0) numOfCoinsLeft -= 1;
 };

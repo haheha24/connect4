@@ -12,8 +12,6 @@ Game::Game(TextureLoader& textureManager,
     // set game colors
     colors[0] = { true, RED, textureManager.getTexture("redCoin") };
     colors[1] = { true, YELLOW, textureManager.getTexture("yellowCoin") };
-    /* colors[2] = { true, GREEN, coins[3] };
-    colors[3] = { true, ORANGE, coins[4] }; */
 
     Game::setPlayerColor(players[0], 1);
     Game::setPlayerColor(players[1], 2);
@@ -77,31 +75,48 @@ void Game::draw()
         {
             row->drawCoin();
             // delete when finished
-            /* std::string blank{ "Blank: " };
-            blank.append(std::to_string(row->isBlank()), 0, 10);
-            std::string owner{ row->getOwner().getName() };
-            owner.append("\n" + blank);
             std::string posY{ "Row: " };
-            posY.append(std::to_string(row->getRowPos()), 0, 10).append("\n" + owner);
+            posY.append(std::to_string(row->getRowPos()), 0, 10);
             std::string posX{ "Col: " };
             posX.append(std::to_string((row->getColumnPos())), 0, 10).append("\n" + posY);
             DrawText(posX.c_str(),
                 recSrc.x + (row->getColumnPos() * row->getCellRec().width),
                 recSrc.y + (row->getRowPos() * row->getCellRec().height),
                 11,
-                BLACK); */
+                BLACK);
         }
     }
 };
 
 void Game::tick(Vector2 mousePos, std::vector<Player>& players)
 {
+    // win conditions
+    if (!gameover)
+    {
+        checkConnect4(players[playerIndex]);
+    }
+    else if (players[0].getCoins() == 0 && players[1].getCoins() == 0)
+    {
+        gameover = true;
+        winner = 0;
+    }
+    // player actions
     for (auto& col : grid2d)
     {
-        for (auto row = col.begin(); row != col.end(); ++row)
+        Rectangle columnRec{
+                col.begin()->getCellRec().x,
+                col.begin()->getCellRec().y,
+                col.begin()->getCellRec().width,
+                col.begin()->getGameRec().height
+        };
+        for (auto row = col.rbegin(); row != col.rend(); ++row)
         {
+            if (CheckCollisionPointRec(mousePos, columnRec))
+            {
+                DrawText("highlighted", row->getGameRec().x + row->getColumnPos() * row->getCellRec().width, row->getGameRec().y + row->getRowPos() * row->getCellRec().height, 11, RED); // replace with highlighted texture around cell
+            }
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
-                CheckCollisionPointRec(mousePos, row->getCellRec()))
+                CheckCollisionPointRec(mousePos, columnRec))
             {
                 if (row->isBlank() && row->getOwner().getPlayerNumber() == 0)
                 {
@@ -109,16 +124,12 @@ void Game::tick(Vector2 mousePos, std::vector<Player>& players)
                     players[playerIndex].tick();
                     playerIndex = -playerIndex + 1;
                     Game::setTurnPlayer(players[playerIndex]);
-                    std::cout << "Position: " << "(" << row->getRowPos() << "," << row->getColumnPos() << ")" << std::endl;
-                    std::cout << "Owned by? " << row->getOwner().getName() << std::endl;
-                    std::cout << "blank? " << row->isBlank() << std::endl;
-                    std::cout << "Color: " << std::to_string(row->getOwner().getPlayerColor().r).c_str() << ", " << std::to_string(row->getOwner().getPlayerColor().b).c_str() << ", " << std::to_string(row->getOwner().getPlayerColor().g).c_str() << ", " << std::to_string(row->getOwner().getPlayerColor().a).c_str() << std::endl;
-                    std::cout << "Number of turns left: " << row->getOwner().getNumOfCoinsLeft() << "\n"
-                        << std::endl;
+                    return;
                 }
             }
         }
     }
+
 };
 
 void Game::setPlayerColor(Player& player, int n)
@@ -160,3 +171,75 @@ void Game::setPlayerColor(Player& player, int n)
         }
     }
 }
+
+void Game::checkConnect4(Player& player)
+{
+    for (int col = 0; col < grid2d.size() - 1; ++col)
+    {
+        for (int row = grid2d[col].size() - 1; row >= 0; --row)
+        {
+            if (!grid2d[col][row].isBlank())
+            {
+                //vertical
+                if (row > 0 && grid2d[col][row].getOwner().getPlayerNumber() == grid2d[col][row - 1].getOwner().getPlayerNumber())
+                {
+                    ++player.coinCounter.vertical;
+                    if (player.coinCounter.vertical == 4) { gameover = true; winner = grid2d[col][row].getOwner().getPlayerNumber(); }
+                }
+                else
+                {
+                    player.coinCounter.vertical = 1;
+                }
+                //check horizontal
+                //check next column but guard against out of bounds
+                if (col < grid2d.size() - 1 &&
+                    grid2d[col][row].getOwner().getPlayerNumber() == grid2d[col + 1][row].getOwner().getPlayerNumber())
+                {
+                    ++player.coinCounter.horizontal;
+                    if (player.coinCounter.horizontal == 4) { gameover = true; winner = grid2d[col][row].getOwner().getPlayerNumber(); }
+                }
+                else
+                {
+                    player.coinCounter.horizontal = 1;
+                }
+                /*//check diagonol upwards
+                if (col + 1 > grid2d.size() - 1 &&
+                    row - 1 > 0 &&
+                    grid2d[col + 1][row - 1].getOwner().getPlayerNumber() == player.getPlayerNumber())
+                {
+                    ++diagonolUpwardsCounter;
+                    if (diagonolUpwardsCounter == 4) { gameover = true; winner = player.getPlayerNumber(); }
+                }
+                else
+                {
+                    diagonolUpwardsCounter = 1;
+                }
+                //check diagonol downwards
+                if (col + 1 > grid2d.size() - 1 &&
+                    row + 1 < grid2d[col].size() - 1 &&
+                    grid2d[col + 1][row + 1].getOwner().getPlayerNumber() == player.getPlayerNumber())
+                {
+                    ++diagonolDownwardsCounter;
+                    if (diagonolDownwardsCounter == 4) { gameover = true; winner = player.getPlayerNumber(); }
+                }
+                else
+                {
+                    diagonolDownwardsCounter = 1;
+                } */
+            }
+            else
+            {
+                break;
+            }
+        }
+
+    };
+}
+
+Game::GameState Game::getGameState() {
+    GameState state{
+        gameover,
+        winner
+    };
+    return state;
+};

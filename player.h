@@ -6,6 +6,13 @@
 
 class Player
 {
+private:
+    typedef struct {
+        int vertical{ 1 };
+        int horizontal{ 1 };
+        int diagonolUpwards{ 1 };
+        int diagonolDownwards{ 1 };
+    }counters;
 public:
     Player(int playerNumber = 0);
     void tick();
@@ -16,14 +23,12 @@ public:
     void setPlayerTexture(Texture2D coin);
     int getCoins() { return numOfCoinsLeft; }
     std::string getName() { return name; }
-    int getNumOfCoinsLeft() { return numOfCoinsLeft; }
-
+    counters coinCounter{};
 private:
     Color playerColor{};
     Texture2D playerCoinTexture{};
     int playerNumber{};
     int numOfCoinsLeft{ 21 };
-    bool hasTurns{ true };
     std::string name{ "Player " };
 };
 

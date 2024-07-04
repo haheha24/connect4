@@ -20,9 +20,7 @@ public:
     void updateCell(Player& player);
     Rectangle getGameRec() { return gameRec; }
     void updateGameRec(Rectangle& newGameRec) { gameRec = newGameRec; }
-
     void updateTexture(Texture2D coin) { tex = coin; }
-
     void drawCoin();
 
 protected:
