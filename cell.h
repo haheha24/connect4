@@ -1,14 +1,13 @@
 #ifndef CELL_H
 #define CELL_H
 
-#include "raylib.h"
 #include "player.h"
+#include "raylib.h"
 
 class Player;
 
-class Cell
-{
-public:
+class Cell {
+   public:
     Cell(int col, int row, Rectangle cellRec, Rectangle gameRec, Texture2D texture);
     int getRowPos() { return row; }
     int getColumnPos() { return column; }
@@ -23,16 +22,16 @@ public:
     void updateTexture(Texture2D coin) { tex = coin; }
     void drawCoin();
 
-protected:
+   protected:
     void drawCoinDrop();
 
-private:
+   private:
     int column{};
     int row{};
     Rectangle cellRec{};
     Rectangle gameRec{};
-    bool blank{ true };
-    Player owner{ 0 };
+    bool blank{true};
+    Player owner{0};
     Texture2D tex{};
 };
 #endif
