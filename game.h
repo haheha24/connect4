@@ -16,15 +16,17 @@ class Player;  // forward declare
 class Cell;
 
 class Game {
-   protected:
+   private:
     typedef struct {
         bool gameover;
+        bool paused;
         int winner;
     } GameState;
     typedef struct {
-        int column;
-        int row;
-    } GridPos;
+        bool available{true};
+        Color color;
+        Texture2D coin;
+    } PlayerColor;
 
    public:
     Game(TextureLoader& textureManager, float screenWidth, float screenHeight, std::vector<Player>& players);
@@ -36,9 +38,15 @@ class Game {
     void setTurnPlayer(Player player) { turnPlayer = player; }
     void setPlayerIndex(int idx) { playerIndex = idx; }
     int getPlayerIndex() { return playerIndex; }
+    void unpause() { paused = false; }
+    void pause() { paused = true; }
     GameState getGameState();
 
    private:
+    bool mainMenu{true};
+    bool paused{true};
+    bool gameover{false};
+    int winner{0};
     TextureLoader textureManager{};
     static constexpr int COLS{7};
     static constexpr int ROWS{6};
@@ -54,17 +62,11 @@ class Game {
         height};
     std::vector<std::vector<Cell>> grid2d;
     Player turnPlayer{};
+    Player preTurnPlayer = turnPlayer;
     int playerIndex{0};
-    struct PlayerColor {
-        bool available{true};
-        Color color;
-        Texture2D coin;
-    };
     static const int sizeOfPlayerColors{2};
     PlayerColor colors[sizeOfPlayerColors];
-    bool gameover{false};
-    int winner{0};
-    void checkDiagonol(int row, int column, bool direction);
+    bool winCon(Player& player);
 };
 
 #endif

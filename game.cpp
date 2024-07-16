@@ -1,4 +1,4 @@
-#include "game.h"
+#include "Game.h"
 
 Game::Game(TextureLoader& textureManager,
            float screenWidth,
@@ -32,6 +32,7 @@ Game::Game(TextureLoader& textureManager,
     }
 };
 
+/*********** GAME MENUS **************/
 void Game::updateRes(float newScreenWidth, float newScreenHeight) {
     // UPDATE VALUES
     screenWidth = newScreenWidth;
@@ -61,25 +62,68 @@ void Game::updateRes(float newScreenWidth, float newScreenHeight) {
 void Game::draw() {
     DrawRectangle(recSrc.x, recSrc.y, recSrc.width, recSrc.height, BLUE);
     for (auto& col : grid2d) {
-        for (auto row = col.begin(); row != col.end(); ++row) {
-            row->drawCoin();
-            // delete when finished
-            std::string posY{"Row: "};
-            posY.append(std::to_string(row->getRowPos()), 0, 10);
-            std::string posX{"Col: "};
-            posX.append(std::to_string((row->getColumnPos())), 0, 10).append("\n" + posY);
-            DrawText(posX.c_str(),
-                     recSrc.x + (row->getColumnPos() * row->getCellRec().width),
-                     recSrc.y + (row->getRowPos() * row->getCellRec().height),
-                     11,
-                     BLACK);
+        for (auto&& row : col) {
+            row.drawCoin();
         }
     }
 };
 
 void Game::tick(Vector2 mousePos, std::vector<Player>& players) {
-    Player previousPlayer = players[-playerIndex + 1];
+    for (auto& col : grid2d) {
+        for (auto&& row = col.rbegin(); row != col.rend(); ++row) {
+            Rectangle columnRec{
+                col.begin()->getCellRec().x,
+                col.begin()->getCellRec().y,
+                col.begin()->getCellRec().width,
+                col.begin()->getGameRec().height};
+            // mouse hover effect for col indication
+            if (CheckCollisionPointRec(mousePos, columnRec)) {
+                DrawText("highlighted", row->getGameRec().x + row->getColumnPos() * row->getCellRec().width, row->getGameRec().y + row->getRowPos() * row->getCellRec().height, 11, RED);  // replace with highlighted texture around cell
+            }
+
+            // player click action if their turn
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+                CheckCollisionPointRec(mousePos, columnRec)) {
+                if (row->isBlank() && row->getOwner().getPlayerNumber() == 0) {
+                    row->updateCell(players[playerIndex]);
+                    players[playerIndex].tick();
+                    playerIndex = -playerIndex + 1;
+                    preTurnPlayer = players[playerIndex];
+                    return;
+                }
+            }
+        }
+    }
+    /** WIN CONDITION USING 'PREVIOUS PLAYER' **/
+    if (!winCon(players[-playerIndex + 1])) Game::setTurnPlayer(preTurnPlayer);
+    /** NO WINNERS **/
+    if (players[0].getNumOfCoinsLeft() == 0 && players[1].getNumOfCoinsLeft() == 0) {
+        gameover = true;
+        winner = 0;
+    }
+};
+
+bool Game::winCon(Player& previousPlayer) {
     /********************************************** WIN CONDITIONS ****************************************************/
+    /** VERTICAL **/
+    for (auto& col : grid2d) {
+        for (auto&& row = col.rbegin(); row != col.rend(); ++row) {
+            if (row + 1 != col.rend()) {
+                if (previousPlayer.getPlayerNumber() == (row + 1)->getOwner().getPlayerNumber() &&
+                    previousPlayer.getPlayerNumber() == row->getOwner().getPlayerNumber()) {
+                    previousPlayer.incrementVerticalCounter();
+                    if (previousPlayer.getCoinCounter().vertical == 4) {
+                        gameover = true;
+                        winner = previousPlayer.getPlayerNumber();
+                        return true;
+                    }
+                } else {
+                    previousPlayer.resetVerticalCounter();
+                }
+            }
+        }
+    }
+
     /** HORIZONTAL **/
     for (int r = 5; r > 0; --r) {
         for (int c = 0; c < grid2d.size() - 1; ++c) {
@@ -90,6 +134,7 @@ void Game::tick(Vector2 mousePos, std::vector<Player>& players) {
                 if (previousPlayer.getCoinCounter().horizontal == 4) {
                     gameover = true;
                     winner = previousPlayer.getPlayerNumber();
+                    return true;
                 }
             } else
                 previousPlayer.resetHorizontalCounter();
@@ -107,6 +152,7 @@ void Game::tick(Vector2 mousePos, std::vector<Player>& players) {
                 if (previousPlayer.getCoinCounter().diagonolUpwards == 4) {
                     gameover = true;
                     winner = previousPlayer.getPlayerNumber();
+                    return true;
                 }
             } else {
                 previousPlayer.resetDiagUpwardsCounter();
@@ -127,6 +173,7 @@ void Game::tick(Vector2 mousePos, std::vector<Player>& players) {
                 if (previousPlayer.getCoinCounter().diagonolDownwards == 4) {
                     gameover = true;
                     winner = previousPlayer.getPlayerNumber();
+                    return true;
                 }
             } else {
                 previousPlayer.resetDiagDownwardsCounter();
@@ -136,54 +183,7 @@ void Game::tick(Vector2 mousePos, std::vector<Player>& players) {
         if (cDD > 0) --cDD;
     }
     /********************************************** END WIN CONDITIONS ************************************************/
-
-    for (auto& col : grid2d) {
-        for (auto&& row = col.rbegin(); row != col.rend(); ++row) {
-            /********************************************** WIN CONDITIONS ****************************************************/
-            /** VERTICAL **/
-            if (row + 1 != col.rend()) {
-                // check if both cells belong to same player
-                if (previousPlayer.getPlayerNumber() == (row + 1)->getOwner().getPlayerNumber() &&
-                    previousPlayer.getPlayerNumber() == row->getOwner().getPlayerNumber()) {
-                    previousPlayer.incrementVerticalCounter();
-                    if (previousPlayer.getCoinCounter().vertical == 4) {
-                        gameover = true;
-                        winner = previousPlayer.getPlayerNumber();
-                    }
-                } else {
-                    previousPlayer.resetVerticalCounter();
-                }
-            }
-            /********************************************** END WIN CONDITIONS ************************************************/
-
-            Rectangle columnRec{
-                col.begin()->getCellRec().x,
-                col.begin()->getCellRec().y,
-                col.begin()->getCellRec().width,
-                col.begin()->getGameRec().height};
-            // mouse hover effect for col indication
-            if (CheckCollisionPointRec(mousePos, columnRec)) {
-                DrawText("highlighted", row->getGameRec().x + row->getColumnPos() * row->getCellRec().width, row->getGameRec().y + row->getRowPos() * row->getCellRec().height, 11, RED);  // replace with highlighted texture around cell
-            }
-
-            // player click action if their turn
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
-                CheckCollisionPointRec(mousePos, columnRec)) {
-                if (row->isBlank() && row->getOwner().getPlayerNumber() == 0) {
-                    row->updateCell(players[playerIndex]);
-                    players[playerIndex].tick();
-                    playerIndex = -playerIndex + 1;
-                    Game::setTurnPlayer(players[playerIndex]);
-                    return;
-                }
-            }
-        }
-    }
-
-    if (players[0].getNumOfCoinsLeft() == 0 && players[1].getNumOfCoinsLeft() == 0) {
-        gameover = true;
-        winner = 0;
-    }
+    return false;
 };
 
 void Game::setPlayerColor(Player& player, int n) {
@@ -220,17 +220,9 @@ void Game::setPlayerColor(Player& player, int n) {
     }
 }
 
-// Input starting coordinate from grid using row and column.
-// True for upwards and false for downwards.
-void Game::checkDiagonol(int row, int column, bool direction) {
-    if (direction) {  // upwards
-
-    } else {  // downwards
-    }
-};
-
 Game::GameState Game::getGameState() {
     GameState state{
+        paused,
         gameover,
         winner};
     return state;

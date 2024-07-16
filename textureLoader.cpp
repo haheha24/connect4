@@ -1,4 +1,4 @@
-#include "textureLoader.h"
+#include "TextureLoader.h"
 
 #include <stdexcept>
 

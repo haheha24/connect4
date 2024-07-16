@@ -1,4 +1,4 @@
-#include "player.h"
+#include "Player.h"
 
 Player::Player(int playerNumber) : playerNumber(playerNumber) {
     name.append(std::to_string(playerNumber));

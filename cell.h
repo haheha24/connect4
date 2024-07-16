@@ -33,5 +33,9 @@ class Cell {
     bool blank{true};
     Player owner{0};
     Texture2D tex{};
+    bool drop{false};
+    float runningTime{};
+    float updateTime{};
+    float deltaTime{};
 };
 #endif
