@@ -1,28 +1,42 @@
 #include "Cell.h"
 
-Cell::Cell(int col, int row, Rectangle cellRec, Rectangle gameRec, Texture2D texture) : column(col), row(row), cellRec(cellRec), gameRec(gameRec), tex(texture){};
+Cell::Cell(int col, int row, Rectangle cellRec, Rectangle gameRec, Texture2D texBlank) : column(col), row(row), cellRec(cellRec), gameRec(gameRec), texBlank(texBlank) {};
 
-void Cell::drawCoinDrop() {
-    Rectangle gridColumn{static_cast<float>(gameRec.x + (column * (gameRec.width / 7))),
-                         static_cast<float>(gameRec.y + (row * (gameRec.height / 6))),
-                         cellRec.width,
-                         gameRec.height};
-
-    // update animation frame
-    runningTime += deltaTime;
-    if (runningTime >= updateTime) {
-        /* frame++; */
-        runningTime = 0.f;
-        /* if (frame > maxFrame) frame = 0; */
+void Cell::draw() {
+    // Coin pos per frame
+    if (isCoinDropping && blank) {
+        float deltaTime = GetFrameTime();
+        velocity = gravity * deltaTime;
+        coinDest.y += velocity;
+        if (coinDest.y > cellRec.y) {
+            coinDest.y = cellRec.y;
+            blank = false;
+        }
     }
-    DrawTexturePro(tex, Rectangle{0.f, 0.f, static_cast<float>(tex.width), static_cast<float>(tex.height)}, cellRec, {}, 0.f, WHITE);
-};
-void Cell::drawCoin() {
-    if (drop) DrawTexturePro(tex, Rectangle{0.f, 0.f, static_cast<float>(tex.width), static_cast<float>(tex.height)}, cellRec, {}, 0.f, WHITE);
-};
+    // Player coin
+    if (isCoinDropping) {
+        DrawTexturePro(texCoin, Rectangle{0.f, 0.f, static_cast<float>(texCoin.width), static_cast<float>(texCoin.height)}, coinDest, {}, 0.f, WHITE);
+    }
+    // Blank
+    if (blank) {
+        DrawTexturePro(texBlank, Rectangle{0.f, 0.f, static_cast<float>(texBlank.width), static_cast<float>(texBlank.height)}, cellRec, {}, 0.f, WHITE);
+    }
+}
 
 void Cell::updateCell(Player& player) {
-    blank = false;
     owner = player;
-    updateTexture(owner.getPlayerCoinTexture());
+    texCoin = owner.getPlayerCoinTexture();
+};
+
+void Cell::reset() {
+    blank = true;
+    owner = Player();
+    texCoin = {};
+    isCoinDropping = false;
+    velocity = 0;
+    coinDest = {
+        static_cast<float>(gameRec.x + (column * (gameRec.width / 7))),
+        gameRec.y - cellRec.height,
+        cellRec.width,
+        cellRec.height};
 };

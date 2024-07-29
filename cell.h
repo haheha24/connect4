@@ -3,39 +3,49 @@
 
 #include "player.h"
 #include "raylib.h"
+#include "raymath.h"
+#include "textureLoader.h"
 
 class Player;
+class TextureLoader;
 
 class Cell {
    public:
-    Cell(int col, int row, Rectangle cellRec, Rectangle gameRec, Texture2D texture);
+    Cell(int col, int row, Rectangle cellRec, Rectangle gameRec, Texture2D texBlank);
     int getRowPos() { return row; }
     int getColumnPos() { return column; }
     bool isBlank() { return blank; }
-    void setBlank(bool b) { blank = b; }
     Rectangle getCellRec() { return cellRec; }
     void updateCellRec(Rectangle newRec) { cellRec = newRec; }
-    Player getOwner() { return owner; }
-    void updateCell(Player& player);
+    void updateCoinDest(Rectangle newDest) { coinDest = newDest; }
     Rectangle getGameRec() { return gameRec; }
     void updateGameRec(Rectangle& newGameRec) { gameRec = newGameRec; }
-    void updateTexture(Texture2D coin) { tex = coin; }
-    void drawCoin();
-
-   protected:
-    void drawCoinDrop();
+    Player getOwner() { return owner; }
+    void updateCell(Player& player);
+    void draw();
+    void setCoinIsDropping() { isCoinDropping = true; }
+    void reset();
 
    private:
     int column{};
     int row{};
+
     Rectangle cellRec{};
     Rectangle gameRec{};
+    Rectangle coinDest{
+        static_cast<float>(gameRec.x + (column * (gameRec.width / 7))),
+        gameRec.y - cellRec.height,
+        cellRec.width,
+        cellRec.height};
+
     bool blank{true};
     Player owner{0};
-    Texture2D tex{};
-    bool drop{false};
-    float runningTime{};
-    float updateTime{};
-    float deltaTime{};
+
+    Texture2D texBlank{};
+    Texture2D texCoin{};
+
+    bool isCoinDropping{false};
+    int gravity{1000};  // gravity
+    float velocity{};
 };
 #endif

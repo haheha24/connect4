@@ -17,16 +17,15 @@ class Cell;
 
 class Game {
    private:
-    typedef struct {
+    struct GameState {
         bool gameover;
         bool paused;
-        int winner;
-    } GameState;
-    typedef struct {
-        bool available{true};
+        Player winner;
+    };
+    struct PlayerColor {
         Color color;
         Texture2D coin;
-    } PlayerColor;
+    };
 
    public:
     Game(TextureLoader& textureManager, float screenWidth, float screenHeight, std::vector<Player>& players);
@@ -41,12 +40,13 @@ class Game {
     void unpause() { paused = false; }
     void pause() { paused = true; }
     GameState getGameState();
+    bool newGameRequest{false};
+    void reset(std::vector<Player>& players);
 
    private:
-    bool mainMenu{true};
     bool paused{true};
     bool gameover{false};
-    int winner{0};
+    Player winner;
     TextureLoader textureManager{};
     static constexpr int COLS{7};
     static constexpr int ROWS{6};
@@ -61,9 +61,8 @@ class Game {
         width,
         height};
     std::vector<std::vector<Cell>> grid2d;
+    int playerIndex{GetRandomValue(0, 1)};
     Player turnPlayer{};
-    Player preTurnPlayer = turnPlayer;
-    int playerIndex{0};
     static const int sizeOfPlayerColors{2};
     PlayerColor colors[sizeOfPlayerColors];
     bool winCon(Player& player);

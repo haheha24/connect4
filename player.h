@@ -24,6 +24,7 @@ class Player {
     Texture2D getPlayerCoinTexture() { return playerCoinTexture; }
     void setPlayerTexture(Texture2D coin);
     int getNumOfCoinsLeft() { return numOfCoinsLeft; }
+    void resetNumOfCoinsLeft() { numOfCoinsLeft = 21; }
     std::string getName() { return name; }
     Counters getCoinCounter() { return coinCounter; }
     void incrementVerticalCounter();

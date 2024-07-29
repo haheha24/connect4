@@ -2,11 +2,15 @@
 
 #include <stdexcept>
 
-TextureLoader::TextureLoader() {
+TextureLoader::TextureLoader() {};
+
+void TextureLoader::init() {
     loadTexture("blankCoin", "textures/blankCoin.png");
     loadTexture("redCoin", "textures/redCheeky.png");
     loadTexture("yellowCoin", "textures/yellowChill.png");
-};
+    loadTexture("menuSprite_red", "textures/menu_buttons_sprite_red.png");
+    loadTexture("menuSprite_white", "textures/menu_buttons_sprite_white.png");
+}
 
 void TextureLoader::loadTexture(std::string key, std::string path) {
     try {

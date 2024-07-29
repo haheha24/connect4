@@ -10,6 +10,7 @@
 class TextureLoader {
    public:
     TextureLoader();
+    void init();
     void loadTexture(std::string key, std::string path);
     void unloadTexture(std::string path);
     void unloadTextures();
