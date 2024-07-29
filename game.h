@@ -1,29 +1,55 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <vector>
+
+#include "cell.h"
+#include "player.h"
 #include "raylib.h"
+#include "textureLoader.h"
 
-class Game
-{
-public:
-    Game(float screenWidth, float screenHeight);
-    void update(float newScreenWidth, float newScreenHeight);
-    void draw();
+class Player;  // forward declare
+class Cell;
 
-protected:
-    struct Cell
-    {
-        int x{};
-        int y{};
-        bool blank{true};
-        Rectangle rec{};
-        Rectangle dest{};
-        Texture2D tex{};
+class Game {
+   private:
+    struct GameState {
+        bool gameover;
+        bool paused;
+        Player winner;
+    };
+    struct PlayerColor {
+        Color color;
+        Texture2D coin;
     };
 
-private:
-    static const int COLS{7};
-    static const int ROWS{6};
+   public:
+    Game(TextureLoader& textureManager, float screenWidth, float screenHeight, std::vector<Player>& players);
+    void updateRes(float newScreenWidth, float newScreenHeight);
+    void draw();
+    void tick(Vector2 mousePos, std::vector<Player>& players);
+    void setPlayerColor(Player& player, int n);
+    Player getTurnPlayer() { return turnPlayer; }
+    void setTurnPlayer(Player player) { turnPlayer = player; }
+    void setPlayerIndex(int idx) { playerIndex = idx; }
+    int getPlayerIndex() { return playerIndex; }
+    void unpause() { paused = false; }
+    void pause() { paused = true; }
+    GameState getGameState();
+    bool newGameRequest{false};
+    void reset(std::vector<Player>& players);
+
+   private:
+    bool paused{true};
+    bool gameover{false};
+    Player winner;
+    TextureLoader textureManager{};
+    static constexpr int COLS{7};
+    static constexpr int ROWS{6};
     float screenWidth{};
     float screenHeight{};
     float width{screenWidth * 0.75f};
@@ -34,7 +60,12 @@ private:
         screenPos.y,
         width,
         height};
-    Cell grid[COLS][ROWS];
+    std::vector<std::vector<Cell>> grid2d;
+    int playerIndex{GetRandomValue(0, 1)};
+    Player turnPlayer{};
+    static const int sizeOfPlayerColors{2};
+    PlayerColor colors[sizeOfPlayerColors];
+    bool winCon(Player& player);
 };
 
 #endif
