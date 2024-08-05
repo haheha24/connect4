@@ -15,7 +15,7 @@
                 "command": "C:/msys64/ucrt64/bin/mingw32-make.exe",
                 "args": [
                     "RAYLIB_PATH=C:/raylib/raylib",
-                    "PROJECT_NAME=${fileBasenameNoExtension}",
+                    "PROJECT_NAME=connect4",
                     "OBJS=*.cpp",
                     "BUILD_MODE=DEBUG"
                 ]
@@ -39,7 +39,7 @@
                 "command": "C:/msys64/ucrt64/bin/mingw32-make.exe",
                 "args": [
                     "RAYLIB_PATH=C:/raylib/raylib",
-                    "PROJECT_NAME=${fileBasenameNoExtension}",
+                    "PROJECT_NAME=connect4",
                     "OBJS=*.cpp"
                 ]
             },

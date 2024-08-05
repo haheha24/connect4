@@ -8,7 +8,7 @@
           "name": "Debug",
           "type": "cppdbg",
           "request": "launch",
-          "program": "${workspaceFolder}/${fileBasenameNoExtension}",
+          "program": "${workspaceFolder}/connect4",
           "args": [],
           "stopAtEntry": false,
           "cwd": "${workspaceFolder}",
@@ -36,10 +36,10 @@
           "cwd": "${workspaceFolder}",
           "environment": [],
           "externalConsole": false,
-          "program": "${workspaceFolder}/${fileBasenameNoExtension}",
+          "program": "${workspaceFolder}/connect4",
           "MIMode": "gdb",
           "windows": {
-            "program": "${workspaceFolder}/${fileBasenameNoExtension}.exe",
+            "program": "${workspaceFolder}/connect4.exe",
             "miDebuggerPath": "C:/msys64/ucrt64/bin/gdb.exe"
           },
           "preLaunchTask": "build release",

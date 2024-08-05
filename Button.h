@@ -1,9 +1,6 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
-#include <functional>
-#include <string>
-
 #include "raylib.h"
 
 class Button {

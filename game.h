@@ -2,7 +2,6 @@
 #define GAME_H
 
 #include <algorithm>
-#include <iostream>
 #include <iterator>
 #include <map>
 #include <vector>
